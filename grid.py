@@ -30,29 +30,27 @@ def drawGrid(screen, grid, w_width, w_height):
                 pygame.draw.rect(screen, neutral_color, rect, 0)
 
             if grid.armyA.pos_x == x and grid.armyA.pos_y == y:
-                # Draw armyA
-                armyA_img = grid.armyA.banner
-                armyA_img = pygame.transform.scale(armyA_img, (blockSize, blockSize))
-                screen.blit(armyA_img, rect)
+                drawArmy(screen, grid.armyA, blockSize, rect)
 
             if grid.armyB.pos_x == x and grid.armyB.pos_y == y:
-                # Draw armyB
-                armyB_img = grid.armyB.banner
-                armyB_img = pygame.transform.scale(armyB_img, (blockSize, blockSize))
-                screen.blit(armyB_img, rect)
+                drawArmy(screen, grid.armyB, blockSize, rect)
 
-    for (i, unit) in enumerate(grid.armyA.units):
-        if i != 0 and unit not in grid.armyA.units_merged:
-            unitA_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
-            screen.blit(unitA_img,
-                        pygame.Rect(unit.pos_x * (blockSize + 1), unit.pos_y * (blockSize + 1), blockSize, blockSize))
-    for (i, unit) in enumerate(grid.armyB.units):
-        if i != 0 and unit not in grid.armyB.units_merged:
-            unitB_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
-            screen.blit(unitB_img,
-                        pygame.Rect(unit.pos_x * (blockSize + 1), unit.pos_y * (blockSize + 1), blockSize, blockSize))
+    allUnitsDraw(screen, grid.armyA, blockSize)
+    allUnitsDraw(screen, grid.armyB, blockSize)
+
     pygame.display.flip()
 
+def drawArmy(screen, army, blockSize, rect):
+    army_img = army.banner
+    army_img = pygame.transform.scale(army_img, (blockSize, blockSize))
+    screen.blit(army_img, rect)
+
+def allUnitsDraw(screen, army, blockSize):
+    for (i, unit) in enumerate(army.units):
+        if i != 0 and unit not in army.units_merged:
+            unit_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
+            screen.blit(unit_img,
+                        pygame.Rect(unit.pos_x * (blockSize + 1), unit.pos_y * (blockSize + 1), blockSize, blockSize))
 
 def advanceToArmy(neighbours, army):
     nearest = math.dist(neighbours[0], (army.pos_x, army.pos_y))
@@ -91,32 +89,29 @@ class Grid:
             self.armyA.move(newAfield[0], newAfield[1])
             self.armyB.move(newBfield[0], newBfield[1])
 
-        for u in self.armyA.units:
-            m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), self.armyA)
-            u.move(m[0], m[1])
-            if u.pos_x == self.armyA.pos_x and u.pos_y == self.armyA.pos_y and \
-                    u.identifier not in [unit.identifier for unit in self.armyA.units_merged]:
-                self.armyA.units_merged.append(u)
-                updateMorale(self.armyA, 1)
+        self.allUnitsMove(self.armyA)
+        self.allUnitsMove(self.armyB)
 
-        for u in self.armyB.units:
-            m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), self.armyB)
-            u.move(m[0], m[1])
-            if u.pos_x == self.armyB.pos_x and u.pos_y == self.armyB.pos_y and \
-                    u.identifier not in [unit.identifier for unit in self.armyB.units_merged]:
-                self.armyB.units_merged.append(u)
-                updateMorale(self.armyB, 1)
-
-        if self.armyA.money > 1000:
-            self.armyA.recruitUnit("A", self.size)
-        if self.armyB.money > 1000:
-            self.armyB.recruitUnit("B", self.size)
+        self.checkRecruitmentPossibility(self.armyA, "A")
+        self.checkRecruitmentPossibility(self.armyB, "B")
         self.updateTreasure()
 
         if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
             self.armyA.in_battle = True
             self.armyB.in_battle = True
 
+    def allUnitsMove(self, army):
+        for u in army.units:
+            m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), army)
+            u.move(m[0], m[1])
+            if u.pos_x == army.pos_x and u.pos_y == army.pos_y and \
+                    u.identifier not in [unit.identifier for unit in army.units_merged]:
+                army.units_merged.append(u)
+                updateMorale(army, 1)
+
+    def checkRecruitmentPossibility(self, army, ab):
+        if army.money > 1000:
+            army.recruitUnit(ab, self.size)
     def neighbours(self, row, col):
         neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
                                for i in range(row - 1, row + 2)]

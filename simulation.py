@@ -27,6 +27,11 @@ def simulation():
     grid = Grid(gridSize, armyA, armyB)
     grid.grid[0][0].occupied_by = 1
     grid.grid[gridSize - 1][gridSize - 1].occupied_by = 2
+    for i in range(gridSize):
+        for j in range(gridSize):
+            print(grid.grid[i][j])
+    # Set background
+    screen.fill((128, 128, 128))
 
     blit(screen, timer, grid, w_width, w_height, armyA, armyB)
 

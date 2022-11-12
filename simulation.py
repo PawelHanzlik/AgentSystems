@@ -35,7 +35,7 @@ def simulation():
     # Set background
     screen.fill((128, 128, 128))
 
-    blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize)
+    blit(screen, timer, grid, w_width, w_height, armyA, armyB)
 
     running = True
 
@@ -51,20 +51,26 @@ def simulation():
             if event.type == timer_event:
                 timer += 1
                 grid.update()
-                blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize)
+                blit(screen, timer, grid, w_width, w_height, armyA, armyB)
         pygame.display.flip()
     pygame.quit()
 
 
-def blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize):
+def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
     drawGrid(screen, grid, w_width, w_height)
     screen.fill((128, 128, 128), rect=(670, 100, 50, 50))
     screen.fill((128, 128, 128), rect=(670, 130, 100, 50))
     screen.fill((128, 128, 128), rect=(670, 160, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 300, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 330, 100, 50))
     font = pygame.font.SysFont('Garamond', 16)
     timerSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
     armyA_Surface = font.render("Gold army A: " + str(armyA.money), False, (212, 175, 55))
     armyB_Surface = font.render("Gold army B: " + str(armyB.money), False, (212, 175, 55))
+    armyA_Size = font.render("army A size: " + str(len(armyA.units_merged)), False, (0, 255, 0))
+    armyB_Size = font.render("army B size: " + str(len(armyB.units_merged)), False, (0, 255, 0))
     screen.blit(timerSurface, (650, 100))
     screen.blit(armyA_Surface, (650, 130))
     screen.blit(armyB_Surface, (650, 160))
+    screen.blit(armyA_Size, (650, 300))
+    screen.blit(armyB_Size, (650, 330))

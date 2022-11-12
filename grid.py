@@ -48,8 +48,6 @@ class Grid:
         self.armyA = armyA
         self.armyB = armyB
 
-
-    # TODO
     def update(self):
         self.grid[self.armyA.pos_x][self.armyA.pos_y] = 1
         self.grid[self.armyB.pos_x][self.armyB.pos_y] = 2

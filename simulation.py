@@ -19,12 +19,8 @@ def simulation():
     # Set up the drawing window, adjust the size
     screen = pygame.display.set_mode([w_width, w_height])
 
-    font = pygame.font.SysFont('Garamond', 16)
     # Set background
     screen.fill((128, 128, 128))
-    textSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
-    screen.blit(textSurface, (700, 100))
-
     armyA = Army('images/redArmy.png', 0, 0, 1, 100)
     armyB = Army('images/blueArmy.png', gridSize - 1, gridSize - 1, 1, 100)
 
@@ -37,7 +33,7 @@ def simulation():
     # Set background
     screen.fill((128, 128, 128))
 
-    drawGrid(screen, grid, w_width, w_height)
+    blit(screen, timer, grid, w_width, w_height)
 
     running = True
 
@@ -53,9 +49,14 @@ def simulation():
             if event.type == timer_event:
                 timer += 1
                 grid.update()
-                drawGrid(screen, grid, w_width, w_height)
-                screen.fill((128, 128, 128), rect=(720, 100, 50, 50))
-                textSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
-                screen.blit(textSurface, (700, 100))
+                blit(screen, timer, grid, w_width, w_height)
         pygame.display.flip()
     pygame.quit()
+
+
+def blit(screen, timer, grid, w_width, w_height):
+    drawGrid(screen, grid, w_width, w_height)
+    screen.fill((128, 128, 128), rect=(720, 100, 50, 50))
+    font = pygame.font.SysFont('Garamond', 16)
+    timerSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
+    screen.blit(timerSurface, (700, 100))

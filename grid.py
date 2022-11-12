@@ -20,10 +20,11 @@ def drawGrid(screen, grid, w_width, w_height):
             pos_y = (blockSize + 1) * y
             rect = pygame.Rect(pos_x, pos_y, blockSize, blockSize)
             # Draw cells
-            if grid.grid[x][y] == 1:
+            if grid.grid[x][y].occupied_by == 1:
                 pygame.draw.rect(screen, army_A_color, rect, 0)
-            elif grid.grid[x][y] == 2:
+            elif grid.grid[x][y].occupied_by == 2:
                 pygame.draw.rect(screen, army_B_color, rect, 0)
+                grid.grid[x][y].occupied_by = 2
             else:
                 pygame.draw.rect(screen, neutral_color, rect, 0)
 
@@ -44,23 +45,37 @@ def drawGrid(screen, grid, w_width, w_height):
 class Grid:
     def __init__(self, size, armyA, armyB):
         self.size = size
-        self.grid = np.array([[Field(i, j, 0, " ") for i in range(size)] for j in range(size)])
+        self.grid = np.array(
+            [[Field(i, j, int(random.random() * 10 + 1), 0) for i in range(size)] for j in range(size)])
         self.armyA = armyA
         self.armyB = armyB
 
     def update(self):
-        self.grid[self.armyA.pos_x][self.armyA.pos_y] = 1
-        self.grid[self.armyB.pos_x][self.armyB.pos_y] = 2
+        self.grid[self.armyA.pos_x][self.armyA.pos_y].occupied_by = 1
+        self.grid[self.armyB.pos_x][self.armyB.pos_y].occupied_by = 2
+
+        # TODO
         newAfield = random.choice(self.neighbours(self.armyA.pos_x, self.armyA.pos_y))
         newBfield = random.choice(self.neighbours(self.armyB.pos_x, self.armyB.pos_y))
+
         self.armyA.move(newAfield[0], newAfield[1])
         self.armyB.move(newBfield[0], newBfield[1])
+
+        self.updateTreasure()
 
     def neighbours(self, row, col):
         neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
                                for i in range(row - 1, row + 2)]
                               for j in range(col - 1, col + 2)])
         return neighbours
+
+    def updateTreasure(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.grid[i][j].occupied_by == 1:
+                    self.armyA.money += self.grid[i][j].gold_generated
+                if self.grid[i][j].occupied_by == 2:
+                    self.armyB.money += self.grid[i][j].gold_generated
 
 
 def flatten(_):

@@ -120,10 +120,14 @@ class Grid:
             self.armyA.money -= unit.maintenance
         for unit in self.armyB.units:
             self.armyB.money -= unit.maintenance
-        if self.armyA.money < 0:
-            self.armyA.money = 0
-        if self.armyB.money < 0:
-            self.armyB.money = 0
+        if self.armyA.money < -100:
+            if len(self.armyA.units) == len(self.armyA.units_merged):
+                self.armyA.units.pop()
+                self.armyA.units_merged.pop()
+        if self.armyB.money < -100:
+            if len(self.armyB.units) == len(self.armyB.units_merged):
+                self.armyB.units.pop()
+                self.armyB.units_merged.pop()
 
 
 def flatten(_):

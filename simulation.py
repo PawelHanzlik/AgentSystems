@@ -15,7 +15,7 @@ def simulation():
     # Parameters
     w_width = 800
     w_height = 600
-    gridSize = 30
+    gridSize = 10
 
     # Set up the drawing window, adjust the size
     screen = pygame.display.set_mode([w_width, w_height])
@@ -24,8 +24,10 @@ def simulation():
     screen.fill((128, 128, 128))
     unitsA = [Unit(0, 0, 0, 5, 'images/blueUnit.png')]
     unitsB = [Unit(gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
-    armyA = Army('images/blueArmy.png', 0, 0, unitsA, 800)
-    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, 800)
+    unitsA_merged = [Unit(0, 0, 0, 5, 'images/blueUnit.png')]
+    unitsB_merged = [Unit(0, 0, 0, 5, 'images/redUnit.png')]
+    armyA = Army('images/blueArmy.png', 0, 0, unitsA, unitsA_merged, 800)
+    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800)
 
     grid = Grid(gridSize, armyA, armyB)
     grid.grid[0][0].occupied_by = 1
@@ -33,7 +35,7 @@ def simulation():
     # Set background
     screen.fill((128, 128, 128))
 
-    blit(screen, timer, grid, w_width, w_height, armyA, armyB)
+    blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize)
 
     running = True
 
@@ -49,12 +51,12 @@ def simulation():
             if event.type == timer_event:
                 timer += 1
                 grid.update()
-                blit(screen, timer, grid, w_width, w_height, armyA, armyB)
+                blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize)
         pygame.display.flip()
     pygame.quit()
 
 
-def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
+def blit(screen, timer, grid, w_width, w_height, armyA, armyB, gridSize):
     drawGrid(screen, grid, w_width, w_height)
     screen.fill((128, 128, 128), rect=(670, 100, 50, 50))
     screen.fill((128, 128, 128), rect=(670, 130, 100, 50))

@@ -13,3 +13,6 @@ class Unit:
     def move(self, x, y):
         self.pos_x = x
         self.pos_y = y
+
+    def __str__(self) -> str:
+        return f"({self.pos_x},{self.pos_y}) -> cost: {self.cost}"

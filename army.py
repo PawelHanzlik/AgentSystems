@@ -25,7 +25,7 @@ class Army:
 
     def recruitUnit(self, army, gridSize):
         if army == "A":
-            self.units.append(Unit(0, 0, 1000, 30, 'images/blueUnit.png'))
+            self.units.append(Unit(len(self.units) + 1, 0, 0, 1000, 30, 'images/blueUnit.png'))
         else:
-            self.units.append(Unit(gridSize - 1, gridSize - 1, 1000, 30, 'images/redUnit.png'))
+            self.units.append(Unit(len(self.units) + 1, gridSize - 1, gridSize - 1, 1000, 30, 'images/redUnit.png'))
         self.money -= 1000

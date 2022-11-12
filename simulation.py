@@ -22,10 +22,10 @@ def simulation():
 
     # Set background
     screen.fill((128, 128, 128))
-    unitsA = [Unit(0, 0, 0, 5, 'images/blueUnit.png')]
-    unitsB = [Unit(gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
-    unitsA_merged = [Unit(0, 0, 0, 5, 'images/blueUnit.png')]
-    unitsB_merged = [Unit(0, 0, 0, 5, 'images/redUnit.png')]
+    unitsA = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
+    unitsB = [Unit(1, gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
+    unitsA_merged = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
+    unitsB_merged = [Unit(1, 0, 0, 0, 5, 'images/redUnit.png')]
     armyA = Army('images/blueArmy.png', 0, 0, unitsA, unitsA_merged, 800)
     armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800)
 
@@ -39,7 +39,7 @@ def simulation():
 
     running = True
 
-    time_delay = 1000
+    time_delay = 100
     timer_event = pygame.USEREVENT + 1
     pygame.time.set_timer(timer_event, time_delay)
 

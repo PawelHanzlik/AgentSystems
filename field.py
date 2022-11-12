@@ -7,5 +7,5 @@ class Field:
         self.occupied_by = occupied_by
 
     def __str__(self) -> str:
-        return " "
+        return f"({self.cord_x},{self.cord_y}) -> gold: {self.gold_generated}, occupied by {'Red Army' if self.occupied_by == 1 else 'Blue Army' if self.occupied_by == 2 else 'Neutral'}"
 

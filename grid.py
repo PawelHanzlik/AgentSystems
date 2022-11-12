@@ -7,8 +7,8 @@ from field import Field
 
 
 def drawGrid(screen, grid, w_width, w_height):
-    army_A_color = pygame.Color(255, 150, 150)
-    army_B_color = pygame.Color(150, 150, 255)
+    army_A_color = pygame.Color(150, 150, 255)
+    army_B_color = pygame.Color(255, 150, 150)
     neutral_color = (255, 255, 255)
 
     size = grid.size
@@ -39,6 +39,15 @@ def drawGrid(screen, grid, w_width, w_height):
                 armyB_img = grid.armyB.banner
                 armyB_img = pygame.transform.scale(armyB_img, (blockSize, blockSize))
                 screen.blit(armyB_img, rect)
+
+    for (i, unit) in enumerate(grid.armyA.units):
+        if i != 0:
+            unitA_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
+            screen.blit(unitA_img, pygame.Rect(unit.pos_x, unit.pos_y, blockSize, blockSize))
+    for (i, unit) in enumerate(grid.armyB.units):
+        if i != 0:
+            unitB_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
+            screen.blit(unitB_img, pygame.Rect(unit.pos_x*(blockSize+1), unit.pos_y*(blockSize+1), blockSize, blockSize))
     pygame.display.flip()
 
 
@@ -61,6 +70,10 @@ class Grid:
         self.armyA.move(newAfield[0], newAfield[1])
         self.armyB.move(newBfield[0], newBfield[1])
 
+        if self.armyA.money > 1000:
+            self.armyA.recruitUnit("A", self.size)
+        if self.armyB.money > 1000:
+            self.armyB.recruitUnit("B", self.size)
         self.updateTreasure()
 
     def neighbours(self, row, col):

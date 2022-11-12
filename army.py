@@ -2,6 +2,8 @@ from dataclasses import dataclass
 
 import pygame
 
+from unit import Unit
+
 
 @dataclass()
 class Army:
@@ -17,3 +19,10 @@ class Army:
     def move(self, x, y):
         self.pos_x = x
         self.pos_y = y
+
+    def recruitUnit(self, army, gridSize):
+        if army == "A":
+            self.units.append(Unit(0, 0, 1000, 50, 'images/blueUnit.png'))
+        else:
+            self.units.append(Unit(gridSize - 1, gridSize - 1, 1000, 50, 'images/redUnit.png'))
+        self.money -= 1000

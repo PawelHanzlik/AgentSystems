@@ -6,6 +6,7 @@ from pygame.locals import (
 
 from army import Army
 from grid import Grid, drawGrid
+from unit import Unit
 
 
 def simulation():
@@ -21,8 +22,10 @@ def simulation():
 
     # Set background
     screen.fill((128, 128, 128))
-    armyA = Army('images/redArmy.png', 0, 0, 1, 100)
-    armyB = Army('images/blueArmy.png', gridSize - 1, gridSize - 1, 1, 100)
+    unitsA = [Unit(0, 0, 0, 5, 'images/blueUnit.png')]
+    unitsB = [Unit(gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
+    armyA = Army('images/blueArmy.png', 0, 0, unitsA, 800)
+    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, 800)
 
     grid = Grid(gridSize, armyA, armyB)
     grid.grid[0][0].occupied_by = 1

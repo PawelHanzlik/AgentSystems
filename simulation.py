@@ -26,8 +26,8 @@ def simulation():
     unitsB = [Unit(1, gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
     unitsA_merged = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
     unitsB_merged = [Unit(1, 0, 0, 0, 5, 'images/redUnit.png')]
-    armyA = Army('images/blueArmy.png', 0, 0, unitsA, unitsA_merged, 800)
-    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800)
+    armyA = Army('images/blueArmy.png', 0, 0, unitsA, unitsA_merged, 800, False, 1.5)
+    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800, False, 1.5)
 
     grid = Grid(gridSize, armyA, armyB)
     grid.grid[0][0].occupied_by = 1
@@ -61,16 +61,22 @@ def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
     screen.fill((128, 128, 128), rect=(670, 100, 50, 50))
     screen.fill((128, 128, 128), rect=(670, 130, 100, 50))
     screen.fill((128, 128, 128), rect=(670, 160, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 200, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 230, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 270, 100, 50))
     screen.fill((128, 128, 128), rect=(670, 300, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 330, 100, 50))
     font = pygame.font.SysFont('Garamond', 16)
     timerSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
     armyA_Surface = font.render("Gold army A: " + str(armyA.money), False, (212, 175, 55))
     armyB_Surface = font.render("Gold army B: " + str(armyB.money), False, (212, 175, 55))
     armyA_Size = font.render("army A size: " + str(len(armyA.units_merged)), False, (0, 255, 0))
     armyB_Size = font.render("army B size: " + str(len(armyB.units_merged)), False, (0, 255, 0))
+    armyA_Morale = font.render("army A morale: " + str(round(armyA.morale, 2)), False, (0, 0, 255))
+    armyB_Morale = font.render("army B morale: " + str(round(armyB.morale, 2)), False, (0, 0, 255))
     screen.blit(timerSurface, (650, 100))
     screen.blit(armyA_Surface, (650, 130))
     screen.blit(armyB_Surface, (650, 160))
-    screen.blit(armyA_Size, (650, 300))
-    screen.blit(armyB_Size, (650, 330))
+    screen.blit(armyA_Size, (650, 200))
+    screen.blit(armyB_Size, (650, 230))
+    screen.blit(armyA_Morale, (650, 270))
+    screen.blit(armyB_Morale, (650, 300))

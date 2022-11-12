@@ -64,6 +64,13 @@ def advanceToArmy(neighbours, army):
     return neighbours[nearest_i]
 
 
+def updateMorale(army, flag):
+    if flag == 1:
+        army.morale += 0.4
+    else:
+        army.morale -= 0.4
+    round(army.morale, 2)
+
 class Grid:
     def __init__(self, size, armyA, armyB):
         self.size = size
@@ -77,18 +84,20 @@ class Grid:
         self.grid[self.armyB.pos_x][self.armyB.pos_y].occupied_by = 2
 
         # TODO
-        newAfield = random.choice(self.neighbours(self.armyA.pos_x, self.armyA.pos_y))
-        newBfield = random.choice(self.neighbours(self.armyB.pos_x, self.armyB.pos_y))
+        if not self.armyA.in_battle:
+            newAfield = random.choice(self.neighbours(self.armyA.pos_x, self.armyA.pos_y))
+            newBfield = random.choice(self.neighbours(self.armyB.pos_x, self.armyB.pos_y))
 
-        self.armyA.move(newAfield[0], newAfield[1])
-        self.armyB.move(newBfield[0], newBfield[1])
+            self.armyA.move(newAfield[0], newAfield[1])
+            self.armyB.move(newBfield[0], newBfield[1])
 
         for u in self.armyA.units:
             m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), self.armyA)
             u.move(m[0], m[1])
-            if u.pos_x == self.armyA.pos_x and u.pos_y == self.armyA.pos_y and\
+            if u.pos_x == self.armyA.pos_x and u.pos_y == self.armyA.pos_y and \
                     u.identifier not in [unit.identifier for unit in self.armyA.units_merged]:
                 self.armyA.units_merged.append(u)
+                updateMorale(self.armyA, 1)
 
         for u in self.armyB.units:
             m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), self.armyB)
@@ -96,12 +105,17 @@ class Grid:
             if u.pos_x == self.armyB.pos_x and u.pos_y == self.armyB.pos_y and \
                     u.identifier not in [unit.identifier for unit in self.armyB.units_merged]:
                 self.armyB.units_merged.append(u)
+                updateMorale(self.armyB, 1)
 
         if self.armyA.money > 1000:
             self.armyA.recruitUnit("A", self.size)
         if self.armyB.money > 1000:
             self.armyB.recruitUnit("B", self.size)
         self.updateTreasure()
+
+        if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
+            self.armyA.in_battle = True
+            self.armyB.in_battle = True
 
     def neighbours(self, row, col):
         neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
@@ -124,10 +138,12 @@ class Grid:
             if len(self.armyA.units) == len(self.armyA.units_merged):
                 self.armyA.units.pop()
                 self.armyA.units_merged.pop()
+                updateMorale(self.armyA, 0)
         if self.armyB.money < -100:
             if len(self.armyB.units) == len(self.armyB.units_merged):
                 self.armyB.units.pop()
                 self.armyB.units_merged.pop()
+                updateMorale(self.armyB, 0)
 
 
 def flatten(_):

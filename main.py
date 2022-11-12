@@ -1,5 +1,5 @@
+from simulation import simulation
 
 
-
-def main():
-    print("Hello World")
+if __name__ == '__main__':
+    simulation()

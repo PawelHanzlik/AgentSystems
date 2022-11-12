@@ -29,8 +29,8 @@ def simulation():
     armyB = Army('images/blueArmy.png', gridSize - 1, gridSize - 1, 1, 100)
 
     grid = Grid(gridSize, armyA, armyB)
-    grid.grid[0][0] = 1
-    grid.grid[gridSize - 1][gridSize - 1] = 2
+    grid.grid[0][0].occupied_by = 1
+    grid.grid[gridSize - 1][gridSize - 1].occupied_by = 2
     # Set background
     screen.fill((128, 128, 128))
 

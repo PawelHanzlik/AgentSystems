@@ -1,5 +1,9 @@
+import random
+
 import numpy as np
 import pygame
+
+from field import Field
 
 
 def drawGrid(screen, grid, w_width, w_height):
@@ -40,10 +44,26 @@ def drawGrid(screen, grid, w_width, w_height):
 class Grid:
     def __init__(self, size, armyA, armyB):
         self.size = size
-        self.grid = np.zeros((size, size))
+        self.grid = np.array([[Field(i, j, 0, " ") for i in range(size)] for j in range(size)])
         self.armyA = armyA
         self.armyB = armyB
 
+
     # TODO
     def update(self):
-        pass
+        self.grid[self.armyA.pos_x][self.armyA.pos_y] = 1
+        self.grid[self.armyB.pos_x][self.armyB.pos_y] = 2
+        newAfield = random.choice(self.neighbours(self.armyA.pos_x, self.armyA.pos_y))
+        newBfield = random.choice(self.neighbours(self.armyB.pos_x, self.armyB.pos_y))
+        self.armyA.move(newAfield[0], newAfield[1])
+        self.armyB.move(newBfield[0], newBfield[1])
+
+    def neighbours(self, row, col):
+        neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
+                               for i in range(row - 1, row + 2)]
+                              for j in range(col - 1, col + 2)])
+        return neighbours
+
+
+def flatten(_):
+    return [item for sublist in _ for item in sublist if item != ()]

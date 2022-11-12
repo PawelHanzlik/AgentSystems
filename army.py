@@ -13,3 +13,7 @@ class Army:
         self.pos_y = pos_y
         self.units = units
         self.money = money
+
+    def move(self, x, y):
+        self.pos_x = x
+        self.pos_y = y

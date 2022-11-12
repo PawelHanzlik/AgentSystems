@@ -5,3 +5,7 @@ class Field:
         self.cord_y = cord_y
         self.gold_generated = gold_generated
         self.occupied_by = occupied_by
+
+    def __str__(self) -> str:
+        return " "
+

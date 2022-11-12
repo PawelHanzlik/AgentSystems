@@ -83,8 +83,8 @@ class Grid:
 
         # TODO
         if not self.armyA.in_battle:
-            newAfield = random.choice(self.neighbours(self.armyA.pos_x, self.armyA.pos_y))
-            newBfield = random.choice(self.neighbours(self.armyB.pos_x, self.armyB.pos_y))
+            newAfield = self.armyMove(self.armyA)
+            newBfield = self.armyMove(self.armyB)
 
             self.armyA.move(newAfield[0], newAfield[1])
             self.armyB.move(newBfield[0], newBfield[1])
@@ -99,6 +99,16 @@ class Grid:
         if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
             self.armyA.in_battle = True
             self.armyB.in_battle = True
+
+    def armyMove(self, army):
+        neighbours = self.neighbours(army.pos_x, army.pos_y)
+        move = random.choice(neighbours)
+        for i in range(len(neighbours)):
+            if self.grid[move[0]][move[1]].occupied_by != 0 and self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0:
+                move = neighbours[i]
+            if self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0 and self.grid[neighbours[i][0], neighbours[i][1]].gold_generated >= self.grid[move[0], move[1]].gold_generated:
+                move = neighbours[i]
+        return move
 
     def allUnitsMove(self, army):
         for u in army.units:

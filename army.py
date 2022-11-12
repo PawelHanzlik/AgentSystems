@@ -19,6 +19,8 @@ class Army:
     def move(self, x, y):
         self.pos_x = x
         self.pos_y = y
+        self.units[0].pos_x = x
+        self.units[0].pos_y = y
 
     def recruitUnit(self, army, gridSize):
         if army == "A":

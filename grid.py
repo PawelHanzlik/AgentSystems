@@ -3,8 +3,8 @@ import pygame
 
 
 def drawGrid(screen, grid, w_width, w_height):
-    army_A_color = (255, 0, 0)
-    army_B_color = (0, 0, 255)
+    army_A_color = pygame.Color(255, 150, 150)
+    army_B_color = pygame.Color(150, 150, 255)
     neutral_color = (255, 255, 255)
 
     size = grid.size
@@ -18,15 +18,31 @@ def drawGrid(screen, grid, w_width, w_height):
             # Draw cells
             if grid.grid[x][y] == 1:
                 pygame.draw.rect(screen, army_A_color, rect, 0)
+            elif grid.grid[x][y] == 2:
+                pygame.draw.rect(screen, army_B_color, rect, 0)
             else:
                 pygame.draw.rect(screen, neutral_color, rect, 0)
+
+            if grid.armyA.pos_x == x and grid.armyA.pos_y == y:
+                # Draw armyA
+                armyA_img = grid.armyA.banner
+                armyA_img = pygame.transform.scale(armyA_img, (blockSize, blockSize))
+                screen.blit(armyA_img, rect)
+
+            if grid.armyB.pos_x == x and grid.armyB.pos_y == y:
+                # Draw armyB
+                armyB_img = grid.armyB.banner
+                armyB_img = pygame.transform.scale(armyB_img, (blockSize, blockSize))
+                screen.blit(armyB_img, rect)
     pygame.display.flip()
 
 
 class Grid:
-    def __init__(self, size):
+    def __init__(self, size, armyA, armyB):
         self.size = size
         self.grid = np.zeros((size, size))
+        self.armyA = armyA
+        self.armyB = armyB
 
     # TODO
     def update(self):

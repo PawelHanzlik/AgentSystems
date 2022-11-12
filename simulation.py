@@ -10,6 +10,7 @@ from pygame.locals import (
     QUIT,
 )
 
+from army import Army
 from grid import Grid, drawGrid
 
 
@@ -17,15 +18,19 @@ def simulation():
 
     pygame.init()
     # Parameters
-    w_width = 600
+    w_width = 800
     w_height = 600
     gridSize = 30
 
     # Set up the drawing window, adjust the size
     screen = pygame.display.set_mode([w_width, w_height])
 
-    grid = Grid(gridSize)
+    armyA = Army('images/redArmy.png', 0, 0, 1, 100)
+    armyB = Army('images/blueArmy.png', gridSize - 1, gridSize - 1, 1, 100)
 
+    grid = Grid(gridSize, armyA, armyB)
+    grid.grid[0][0] = 1
+    grid.grid[gridSize - 1][gridSize - 1] = 2
     # Set background
     screen.fill((128, 128, 128))
 

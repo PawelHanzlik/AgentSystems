@@ -43,7 +43,7 @@ def drawGrid(screen, grid, w_width, w_height):
     for (i, unit) in enumerate(grid.armyA.units):
         if i != 0:
             unitA_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
-            screen.blit(unitA_img, pygame.Rect(unit.pos_x, unit.pos_y, blockSize, blockSize))
+            screen.blit(unitA_img, pygame.Rect(unit.pos_x*(blockSize+1), unit.pos_y*(blockSize+1), blockSize, blockSize))
     for (i, unit) in enumerate(grid.armyB.units):
         if i != 0:
             unitB_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
@@ -69,6 +69,14 @@ class Grid:
 
         self.armyA.move(newAfield[0], newAfield[1])
         self.armyB.move(newBfield[0], newBfield[1])
+
+        for u in self.armyA.units:
+            m = random.choice(self.neighbours(u.pos_x, u.pos_y))
+            u.move(m[0], m[1])
+
+        for u in self.armyB.units:
+            m = random.choice(self.neighbours(u.pos_x, u.pos_y))
+            u.move(m[0], m[1])
 
         if self.armyA.money > 1000:
             self.armyA.recruitUnit("A", self.size)

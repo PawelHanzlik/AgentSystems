@@ -9,3 +9,7 @@ class Unit:
         self.cost = cost
         self.maintenance = maintenance
         self.image = pygame.image.load(image).convert_alpha()
+
+    def move(self, x, y):
+        self.pos_x = x
+        self.pos_y = y

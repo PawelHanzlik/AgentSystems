@@ -40,10 +40,12 @@ def drawGrid(screen, grid, w_width, w_height):
 
     pygame.display.flip()
 
+
 def drawArmy(screen, army, blockSize, rect):
     army_img = army.banner
     army_img = pygame.transform.scale(army_img, (blockSize, blockSize))
     screen.blit(army_img, rect)
+
 
 def allUnitsDraw(screen, army, blockSize):
     for (i, unit) in enumerate(army.units):
@@ -51,6 +53,7 @@ def allUnitsDraw(screen, army, blockSize):
             unit_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
             screen.blit(unit_img,
                         pygame.Rect(unit.pos_x * (blockSize + 1), unit.pos_y * (blockSize + 1), blockSize, blockSize))
+
 
 def advanceToArmy(neighbours, army):
     nearest = math.dist(neighbours[0], (army.pos_x, army.pos_y))
@@ -68,6 +71,30 @@ def updateMorale(army, flag):
     else:
         army.morale -= 0.4
     round(army.morale, 2)
+
+
+def updateMoraleBattle(army):
+    army.morale -= random.random()/5
+    if army.morale < 0:
+        army.morale = 0
+    round(army.morale, 2)
+
+
+def reviveMorale(army):
+    army.morale = 1.5
+    for i in range(1, len(army.units_merged)):
+        army.morale += 0.4
+    round(army.morale, 2)
+
+
+def retreat(armyLost, armyWon, x, y):
+    armyLost.in_battle = False
+    armyWon.in_battle = False
+    armyLost.pos_x = x
+    armyLost.pos_y = y
+    reviveMorale(armyLost)
+    reviveMorale(armyWon)
+
 
 class Grid:
     def __init__(self, size, armyA, armyB):
@@ -88,6 +115,14 @@ class Grid:
 
             self.armyA.move(newAfield[0], newAfield[1])
             self.armyB.move(newBfield[0], newBfield[1])
+        else:
+            if self.armyA.morale == 0:
+                retreat(self.armyA, self.armyB, 0, 0)
+            elif self.armyB.morale == 0:
+                retreat(self.armyB, self.armyA, len(self.grid) - 1, len(self.grid[0]) - 1)
+            else:
+                updateMoraleBattle(self.armyA)
+                updateMoraleBattle(self.armyB)
 
         self.allUnitsMove(self.armyA)
         self.allUnitsMove(self.armyB)
@@ -106,7 +141,8 @@ class Grid:
         for i in range(len(neighbours)):
             if self.grid[move[0]][move[1]].occupied_by != 0 and self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0:
                 move = neighbours[i]
-            if self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0 and self.grid[neighbours[i][0], neighbours[i][1]].gold_generated >= self.grid[move[0], move[1]].gold_generated:
+            if self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0 and \
+                    self.grid[neighbours[i][0], neighbours[i][1]].gold_generated >= self.grid[move[0], move[1]].gold_generated:
                 move = neighbours[i]
         return move
 
@@ -122,6 +158,7 @@ class Grid:
     def checkRecruitmentPossibility(self, army, ab):
         if army.money > 1000:
             army.recruitUnit(ab, self.size)
+
     def neighbours(self, row, col):
         neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
                                for i in range(row - 1, row + 2)]

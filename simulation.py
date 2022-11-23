@@ -26,8 +26,8 @@ def simulation():
     unitsB = [Unit(1, gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')]
     unitsA_merged = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
     unitsB_merged = [Unit(1, 0, 0, 0, 5, 'images/redUnit.png')]
-    armyA = Army('images/blueArmy.png', 0, 0, unitsA, unitsA_merged, 800, False, 1.5)
-    armyB = Army('images/redArmy.png', gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800, False, 1.5)
+    armyA = Army('images/blueArmy.png', 1, 0, 0, unitsA, unitsA_merged, 800, False, 1.5)
+    armyB = Army('images/redArmy.png', 2, gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800, False, 1.5)
 
     grid = Grid(gridSize, armyA, armyB)
     grid.grid[0][0].occupied_by = 1

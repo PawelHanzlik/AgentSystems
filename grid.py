@@ -144,10 +144,11 @@ class Grid:
                 updateMoraleBattle(self.armyA)
                 updateMoraleBattle(self.armyB)
 
-        self.checkRecruitmentPossibility(self.armyA, "A")
-        self.checkRecruitmentPossibility(self.armyB, "B")
         self.allUnitsMove(self.armyA)
         self.allUnitsMove(self.armyB)
+
+        self.checkRecruitmentPossibility(self.armyA, "A")
+        self.checkRecruitmentPossibility(self.armyB, "B")
         self.updateTreasure()
 
         if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
@@ -156,12 +157,31 @@ class Grid:
 
     def armyMove(self, army):
         neighbours = self.neighbours(army.pos_x, army.pos_y)
-        move = random.choice(neighbours)
-        for i in range(len(neighbours)):
-            if self.grid[move[0]][move[1]].occupied_by != 0 and self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0:
+        if army.number == 1:
+            move = neighbours[-1]
+            for i in range(0, len(neighbours) - 1):
+                move = self.determineMovement(army, neighbours, i, move)
+        else:
+            move = neighbours[0]
+            for i in range(1, len(neighbours)):
+                move = self.determineMovement(army, neighbours, i, move)
+        return move
+
+    def determineMovement(self, army, neighbours, i, move):
+        occupied = self.grid[move].occupied_by
+
+        if neighbours[i][0] == army.pos_x and neighbours[i][1] == army.pos_y:
+            return move
+
+        if self.grid[neighbours[i]].occupied_by == 0:
+            if (occupied == 0 and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated) or (
+                    occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[
+                move].gold_generated * 2) or (
+                    occupied != 0 and occupied == army.number and self.grid[neighbours[i]].gold_generated > self.grid[
+                move].gold_generated):
                 move = neighbours[i]
-            if self.grid[neighbours[i][0], neighbours[i][1]].occupied_by == 0 and \
-                    self.grid[neighbours[i][0], neighbours[i][1]].gold_generated >= self.grid[move[0], move[1]].gold_generated:
+        elif self.grid[neighbours[i]].occupied_by != 0 and self.grid[neighbours[i]].occupied_by != army.number:
+            if (occupied == 0 and self.grid[neighbours[i]].gold_generated * 2 > self.grid[move].gold_generated) or (occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated):
                 move = neighbours[i]
         return move
 
@@ -175,7 +195,7 @@ class Grid:
                 updateMorale(army, 1)
 
     def checkRecruitmentPossibility(self, army, ab):
-        if army.money > 1000 and not army.in_battle:
+        if army.money > 1000:
             army.recruitUnit(ab, self.size)
 
     def neighbours(self, row, col):

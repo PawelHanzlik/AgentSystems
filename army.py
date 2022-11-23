@@ -9,8 +9,9 @@ from unit import Unit
 class Army:
     banner: pygame.Surface
 
-    def __init__(self, banner, pos_x, pos_y, units, units_merged, money, in_battle, morale) -> None:
+    def __init__(self, banner, number, pos_x, pos_y, units, units_merged, money, in_battle, morale) -> None:
         self.banner = pygame.image.load(banner).convert_alpha()
+        self.number = number
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.units = units

@@ -157,14 +157,22 @@ class Grid:
 
     def armyMove(self, army):
         neighbours = self.neighbours(army.pos_x, army.pos_y)
+        move = random.choice(neighbours)
+        for i in range(0, len(neighbours)):
+            move = self.determineMovement(army, neighbours, i, move)
+
+        """
         if army.number == 1:
             move = neighbours[-1]
             for i in range(0, len(neighbours) - 1):
                 move = self.determineMovement(army, neighbours, i, move)
+
         else:
             move = neighbours[0]
             for i in range(1, len(neighbours)):
                 move = self.determineMovement(army, neighbours, i, move)
+        """
+
         return move
 
     def determineMovement(self, army, neighbours, i, move):

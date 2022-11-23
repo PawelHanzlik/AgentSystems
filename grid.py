@@ -128,6 +128,11 @@ class Grid:
         self.grid[self.armyA.pos_x][self.armyA.pos_y].occupied_by = 1
         self.grid[self.armyB.pos_x][self.armyB.pos_y].occupied_by = 2
 
+        self.checkRecruitmentPossibility(self.armyA, "A")
+        self.checkRecruitmentPossibility(self.armyB, "B")
+        self.allUnitsMove(self.armyA)
+        self.allUnitsMove(self.armyB)
+
         # TODO
         if not self.armyA.in_battle:
             newAfield = self.armyMove(self.armyA)
@@ -144,11 +149,6 @@ class Grid:
                 updateMoraleBattle(self.armyA)
                 updateMoraleBattle(self.armyB)
 
-        self.allUnitsMove(self.armyA)
-        self.allUnitsMove(self.armyB)
-
-        self.checkRecruitmentPossibility(self.armyA, "A")
-        self.checkRecruitmentPossibility(self.armyB, "B")
         self.updateTreasure()
 
         if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
@@ -183,10 +183,10 @@ class Grid:
 
         if self.grid[neighbours[i]].occupied_by == 0:
             if (occupied == 0 and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated) or (
-                    occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[
-                move].gold_generated * 2) or (
-                    occupied != 0 and occupied == army.number and self.grid[neighbours[i]].gold_generated > self.grid[
-                move].gold_generated):
+                    occupied != 0 and occupied != army.number and
+                    self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated * 2) or\
+                    (occupied != 0 and occupied == army.number and
+                     self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated):
                 move = neighbours[i]
         elif self.grid[neighbours[i]].occupied_by != 0 and self.grid[neighbours[i]].occupied_by != army.number:
             if (occupied == 0 and self.grid[neighbours[i]].gold_generated * 2 > self.grid[move].gold_generated) or (occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated):

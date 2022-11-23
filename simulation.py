@@ -39,7 +39,7 @@ def simulation():
 
     running = True
 
-    time_delay = 100
+    time_delay = 1000
     timer_event = pygame.USEREVENT + 1
     pygame.time.set_timer(timer_event, time_delay)
 
@@ -62,9 +62,10 @@ def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
     screen.fill((128, 128, 128), rect=(670, 130, 100, 50))
     screen.fill((128, 128, 128), rect=(670, 160, 100, 50))
     screen.fill((128, 128, 128), rect=(670, 200, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 230, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 270, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 300, 100, 50))
+    screen.fill((128, 128, 128), rect=(670, 230, 100, 80))
+    screen.fill((128, 128, 128), rect=(650, 270, 150, 80))
+    screen.fill((128, 128, 128), rect=(650, 300, 150, 80))
+    screen.fill((128, 128, 128), rect=(650, 330, 150, 80))
     font = pygame.font.SysFont('Garamond', 16)
     timerSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
     armyA_Surface = font.render("Gold army A: " + str(armyA.money), False, (212, 175, 55))
@@ -73,10 +74,13 @@ def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
     armyB_Size = font.render("army B size: " + str(len(armyB.units_merged)), False, (0, 255, 0))
     armyA_Morale = font.render("army A morale: " + str(round(armyA.morale, 2)), False, (0, 0, 255))
     armyB_Morale = font.render("army B morale: " + str(round(armyB.morale, 2)), False, (0, 0, 255))
+    battle = font.render("BATTLE!!!!", False, (255, 0, 0))
     screen.blit(timerSurface, (650, 100))
     screen.blit(armyA_Surface, (650, 130))
     screen.blit(armyB_Surface, (650, 160))
     screen.blit(armyA_Size, (650, 200))
     screen.blit(armyB_Size, (650, 230))
-    screen.blit(armyA_Morale, (650, 270))
-    screen.blit(armyB_Morale, (650, 300))
+    if armyA.in_battle:
+        screen.blit(armyA_Morale, (650, 270))
+        screen.blit(armyB_Morale, (650, 300))
+        screen.blit(battle, (650, 330))

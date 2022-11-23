@@ -39,7 +39,7 @@ def simulation():
 
     running = True
 
-    time_delay = 1000
+    time_delay = 100
     timer_event = pygame.USEREVENT + 1
     pygame.time.set_timer(timer_event, time_delay)
 
@@ -58,11 +58,11 @@ def simulation():
 
 def blit(screen, timer, grid, w_width, w_height, armyA, armyB):
     drawGrid(screen, grid, w_width, w_height)
-    screen.fill((128, 128, 128), rect=(670, 100, 50, 50))
-    screen.fill((128, 128, 128), rect=(670, 130, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 160, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 200, 100, 50))
-    screen.fill((128, 128, 128), rect=(670, 230, 100, 80))
+    screen.fill((128, 128, 128), rect=(650, 100, 150, 50))
+    screen.fill((128, 128, 128), rect=(650, 130, 150, 50))
+    screen.fill((128, 128, 128), rect=(650, 160, 150, 50))
+    screen.fill((128, 128, 128), rect=(650, 200, 150, 50))
+    screen.fill((128, 128, 128), rect=(650, 230, 150, 80))
     screen.fill((128, 128, 128), rect=(650, 270, 150, 80))
     screen.fill((128, 128, 128), rect=(650, 300, 150, 80))
     screen.fill((128, 128, 128), rect=(650, 330, 150, 80))

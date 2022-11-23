@@ -5,6 +5,7 @@ import numpy as np
 import pygame
 
 from field import Field
+from unit import Unit
 
 
 def drawGrid(screen, grid, w_width, w_height):
@@ -87,11 +88,30 @@ def reviveMorale(army):
     round(army.morale, 2)
 
 
+def inflictLosses(army, lost):
+    if lost:
+        army.units = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
+        army.units_merged = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
+    else:
+        if len(army.units) == len(army.units_merged):
+            for i in range(len(army.units_merged) // 2):
+                army.units.pop(-1)
+                army.units_merged.pop(-1)
+        else:
+            for i in range(len(army.units_merged) // 2):
+                army.units.pop(-2)
+                army.units_merged.pop(-1)
+
+
 def retreat(armyLost, armyWon, x, y):
     armyLost.in_battle = False
     armyWon.in_battle = False
     armyLost.pos_x = x
     armyLost.pos_y = y
+    armyLost.money = 0
+    armyWon.money = 0
+    inflictLosses(armyLost, True)
+    inflictLosses(armyWon, False)
     reviveMorale(armyLost)
     reviveMorale(armyWon)
 
@@ -124,11 +144,10 @@ class Grid:
                 updateMoraleBattle(self.armyA)
                 updateMoraleBattle(self.armyB)
 
-        self.allUnitsMove(self.armyA)
-        self.allUnitsMove(self.armyB)
-
         self.checkRecruitmentPossibility(self.armyA, "A")
         self.checkRecruitmentPossibility(self.armyB, "B")
+        self.allUnitsMove(self.armyA)
+        self.allUnitsMove(self.armyB)
         self.updateTreasure()
 
         if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
@@ -156,7 +175,7 @@ class Grid:
                 updateMorale(army, 1)
 
     def checkRecruitmentPossibility(self, army, ab):
-        if army.money > 1000:
+        if army.money > 1000 and not army.in_battle:
             army.recruitUnit(ab, self.size)
 
     def neighbours(self, row, col):

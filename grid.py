@@ -136,10 +136,12 @@ class Grid:
         # TODO
         if not self.armyA.in_battle:
             newAfield = self.armyMove(self.armyA)
-            newBfield = self.armyMove(self.armyB)
-
             self.armyA.move(newAfield[0], newAfield[1])
-            self.armyB.move(newBfield[0], newBfield[1])
+
+            if self.armyA.pos_x != self.armyB.pos_x or self.armyA.pos_y != self.armyB.pos_y:
+                newBfield = self.armyMove(self.armyB)
+                self.armyB.move(newBfield[0], newBfield[1])
+
         else:
             if self.armyA.morale == 0:
                 retreat(self.armyA, self.armyB, 0, 0)

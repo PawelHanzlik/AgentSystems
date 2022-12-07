@@ -39,7 +39,7 @@ def simulation():
 
     running = True
 
-    time_delay = 100
+    time_delay = 1000
     timer_event = pygame.USEREVENT + 1
     pygame.time.set_timer(timer_event, time_delay)
 

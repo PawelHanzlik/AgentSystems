@@ -130,8 +130,8 @@ class Grid:
 
         self.checkRecruitmentPossibility(self.armyA, "A")
         self.checkRecruitmentPossibility(self.armyB, "B")
-        self.allUnitsMove(self.armyA)
-        self.allUnitsMove(self.armyB)
+        self.allUnitsMove(self.armyA, "A")
+        self.allUnitsMove(self.armyB, "B")
 
         # TODO
         if not self.armyA.in_battle:
@@ -195,10 +195,14 @@ class Grid:
                 move = neighbours[i]
         return move
 
-    def allUnitsMove(self, army):
+    def allUnitsMove(self, army, ab):
         for u in army.units:
             m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), army)
             u.move(m[0], m[1])
+            if ab == "A":
+                self.grid[m[0], m[1]].occupied_by = 1
+            else:
+                self.grid[m[0], m[1]].occupied_by = 2
             if u.pos_x == army.pos_x and u.pos_y == army.pos_y and \
                     u.identifier not in [unit.identifier for unit in army.units_merged]:
                 army.units_merged.append(u)

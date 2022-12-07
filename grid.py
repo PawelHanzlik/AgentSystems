@@ -75,7 +75,7 @@ def updateMorale(army, flag):
 
 
 def updateMoraleBattle(army):
-    army.morale -= random.random()/5
+    army.morale -= random.random() / 5
     if army.morale < 0:
         army.morale = 0
     round(army.morale, 2)
@@ -88,10 +88,14 @@ def reviveMorale(army):
     round(army.morale, 2)
 
 
-def inflictLosses(army, lost):
+def inflictLosses(army, lost, x, y, ab):
     if lost:
-        army.units = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
-        army.units_merged = [Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')]
+        if ab == "A":
+            army.units = [Unit(1, x, y, 0, 5, 'images/blueUnit.png')]
+            army.units_merged = [Unit(1, x, y, 0, 5, 'images/blueUnit.png')]
+        else:
+            army.units = [Unit(1, x, y, 0, 5, 'images/redUnit.png')]
+            army.units_merged = [Unit(1, x, y, 0, 5, 'images/redUnit.png')]
     else:
         if len(army.units) == len(army.units_merged):
             for i in range(len(army.units_merged) // 2):
@@ -103,15 +107,15 @@ def inflictLosses(army, lost):
                 army.units_merged.pop(-1)
 
 
-def retreat(armyLost, armyWon, x, y):
+def retreat(armyLost, armyWon, x, y, ab):
     armyLost.in_battle = False
     armyWon.in_battle = False
     armyLost.pos_x = x
     armyLost.pos_y = y
     armyLost.money = 0
     armyWon.money = 0
-    inflictLosses(armyLost, True)
-    inflictLosses(armyWon, False)
+    inflictLosses(armyLost, True, x, y, ab)
+    inflictLosses(armyWon, False, x, y, ab)
     reviveMorale(armyLost)
     reviveMorale(armyWon)
 
@@ -144,9 +148,9 @@ class Grid:
 
         else:
             if self.armyA.morale == 0:
-                retreat(self.armyA, self.armyB, 0, 0)
+                retreat(self.armyA, self.armyB, 0, 0, "A")
             elif self.armyB.morale == 0:
-                retreat(self.armyB, self.armyA, len(self.grid) - 1, len(self.grid[0]) - 1)
+                retreat(self.armyB, self.armyA, len(self.grid) - 1, len(self.grid[0]) - 1, "B")
             else:
                 updateMoraleBattle(self.armyA)
                 updateMoraleBattle(self.armyB)
@@ -186,27 +190,42 @@ class Grid:
         if self.grid[neighbours[i]].occupied_by == 0:
             if (occupied == 0 and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated) or (
                     occupied != 0 and occupied != army.number and
-                    self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated * 2) or\
+                    self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated * 2) or \
                     (occupied != 0 and occupied == army.number and
                      self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated):
                 move = neighbours[i]
         elif self.grid[neighbours[i]].occupied_by != 0 and self.grid[neighbours[i]].occupied_by != army.number:
-            if (occupied == 0 and self.grid[neighbours[i]].gold_generated * 2 > self.grid[move].gold_generated) or (occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[move].gold_generated):
+            if (occupied == 0 and self.grid[neighbours[i]].gold_generated * 2 > self.grid[move].gold_generated) or (
+                    occupied != 0 and occupied != army.number and self.grid[neighbours[i]].gold_generated > self.grid[
+                move].gold_generated):
                 move = neighbours[i]
         return move
 
     def allUnitsMove(self, army, ab):
+        to_remove = []
         for u in army.units:
             m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), army)
             u.move(m[0], m[1])
             if ab == "A":
-                self.grid[m[0], m[1]].occupied_by = 1
+                if not army.in_battle and u not in army.units_merged:
+                    if self.armyB.pos_x == u.pos_x and self.armyB.pos_y == u.pos_y:
+                        to_remove.append(u)
+                        continue
+                    else:
+                        self.grid[m[0], m[1]].occupied_by = 1
             else:
-                self.grid[m[0], m[1]].occupied_by = 2
+                if not army.in_battle and u not in army.units_merged:
+                    if self.armyA.pos_x == u.pos_x and self.armyA.pos_y == u.pos_y:
+                        to_remove.append(u)
+                        continue
+                    else:
+                        self.grid[m[0], m[1]].occupied_by = 2
             if u.pos_x == army.pos_x and u.pos_y == army.pos_y and \
                     u.identifier not in [unit.identifier for unit in army.units_merged]:
                 army.units_merged.append(u)
                 updateMorale(army, 1)
+        for u in to_remove:
+            army.units.remove(u)
 
     def checkRecruitmentPossibility(self, army, ab):
         if army.money > 1000:

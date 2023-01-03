@@ -30,14 +30,17 @@ def drawGrid(screen, grid, w_width, w_height):
             else:
                 pygame.draw.rect(screen, neutral_color, rect, 0)
 
-            if grid.armyA.pos_x == x and grid.armyA.pos_y == y:
-                drawArmy(screen, grid.armyA, blockSize, rect)
+            for a in grid.kingdomA.armies:
+                if a.pos_x == x and a.pos_y == y:
+                    drawArmy(screen, a, blockSize, rect)
+            for b in grid.kingdomB.armies:
+                if b.pos_x == x and b.pos_y == y:
+                    drawArmy(screen, b, blockSize, rect)
 
-            if grid.armyB.pos_x == x and grid.armyB.pos_y == y:
-                drawArmy(screen, grid.armyB, blockSize, rect)
-
-    allUnitsDraw(screen, grid.armyA, blockSize)
-    allUnitsDraw(screen, grid.armyB, blockSize)
+    for a in grid.kingdomA.armies:
+        allUnitsDraw(screen, a, blockSize)
+    for b in grid.kingdomB.armies:
+        allUnitsDraw(screen, b, blockSize)
 
     pygame.display.flip()
 
@@ -50,7 +53,7 @@ def drawArmy(screen, army, blockSize, rect):
 
 def allUnitsDraw(screen, army, blockSize):
     for (i, unit) in enumerate(army.units):
-        if i != 0 and unit not in army.units_merged:
+        if unit not in army.units_merged:
             unit_img = pygame.transform.scale(unit.image, (blockSize, blockSize))
             screen.blit(unit_img,
                         pygame.Rect(unit.pos_x * (blockSize + 1), unit.pos_y * (blockSize + 1), blockSize, blockSize))
@@ -91,20 +94,14 @@ def reviveMorale(army):
 def inflictLosses(army, lost, x, y, ab):
     if lost:
         if ab == "A":
-            army.units = [Unit(1, x, y, 0, 5, 'images/blueUnit.png')]
+            army.units = []
             army.units_merged = [Unit(1, x, y, 0, 5, 'images/blueUnit.png')]
         else:
-            army.units = [Unit(1, x, y, 0, 5, 'images/redUnit.png')]
+            army.units = []
             army.units_merged = [Unit(1, x, y, 0, 5, 'images/redUnit.png')]
     else:
-        if len(army.units) == len(army.units_merged):
-            for i in range(len(army.units_merged) // 2):
-                army.units.pop(-1)
-                army.units_merged.pop(-1)
-        else:
-            for i in range(len(army.units_merged) // 2):
-                army.units.pop(-2)
-                army.units_merged.pop(-1)
+        for i in range(len(army.units_merged) // 2):
+            army.units_merged.pop(-1)
 
 
 def retreat(armyLost, armyWon, x, y, ab):
@@ -121,49 +118,134 @@ def retreat(armyLost, armyWon, x, y, ab):
 
 
 class Grid:
-    def __init__(self, size, armyA, armyB):
+    def __init__(self, size, kingdomA, kingdomB):
         self.size = size
         self.grid = np.array(
             [[Field(i, j, int(random.random() * 10 + 1), 0) for i in range(size)] for j in range(size)])
-        self.armyA = armyA
-        self.armyB = armyB
+        self.grid[0, 0].standing_on .append(kingdomA.armies[0])
+        self.grid[size-1, size-1].standing_on.append(kingdomB.armies[0])
+        self.kingdomA = kingdomA
+        self.kingdomB = kingdomB
 
     def update(self):
-        self.grid[self.armyA.pos_x][self.armyA.pos_y].occupied_by = 1
-        self.grid[self.armyB.pos_x][self.armyB.pos_y].occupied_by = 2
+        self.checkRecruitmentPossibility("A")
+        self.checkRecruitmentPossibility("B")
 
-        self.checkRecruitmentPossibility(self.armyA, "A")
-        self.checkRecruitmentPossibility(self.armyB, "B")
-        self.allUnitsMove(self.armyA, "A")
-        self.allUnitsMove(self.armyB, "B")
+        if len(self.kingdomA.armies) > len(self.kingdomB.armies):
+            for i in range(len(self.kingdomA.armies)):
+                if i < len(self.kingdomB.armies):
+                    self.updateArmyA(self.kingdomA.armies[i])
+                    self.updateArmyB(self.kingdomB.armies[i])
+                else:
+                    self.updateArmyA(self.kingdomA.armies[i])
 
-        # TODO
-        if not self.armyA.in_battle:
-            newAfield = self.armyMove(self.armyA)
-            self.armyA.move(newAfield[0], newAfield[1])
+        elif len(self.kingdomA.armies) < len(self.kingdomB.armies):
+            for i in range(len(self.kingdomB.armies)):
+                if i < len(self.kingdomA.armies):
+                    self.updateArmyA(self.kingdomA.armies[i])
+                    self.updateArmyB(self.kingdomB.armies[i])
+                else:
+                    self.updateArmyB(self.kingdomB.armies[i])
+        else:
+            for i in range(len(self.kingdomA.armies)):
+                self.updateArmyA(self.kingdomA.armies[i])
+                self.updateArmyB(self.kingdomB.armies[i])
 
-            if self.armyA.pos_x != self.armyB.pos_x or self.armyA.pos_y != self.armyB.pos_y:
-                newBfield = self.armyMove(self.armyB)
-                self.armyB.move(newBfield[0], newBfield[1])
+        self.kingdomA.morale -= 0.01
+        self.kingdomB.morale -= 0.01
+        self.updateTreasure()
+
+
+    def updateArmyA(self, armyA):
+        self.grid[armyA.pos_x][armyA.pos_y].occupied_by = 1
+        self.allUnitsMove(armyA, "A")
+
+        if not armyA.in_battle:
+            newAfield = self.armyMove(armyA)
+            if armyA in self.grid[armyA.pos_x][armyA.pos_y].standing_on:
+                self.grid[armyA.pos_x][armyA.pos_y].standing_on.remove(armyA)
+            armyA.move(newAfield[0], newAfield[1])
+            self.grid[newAfield[0], newAfield[1]].standing_on.append(armyA)
+        else:
+            if armyA.morale == 0:
+                retreat(armyA, armyA.opponent, 0, 0, "A")
+                self.kingdomA.morale -= 0.2
+                self.kingdomB.morale += 0.1
+            else:
+                updateMoraleBattle(armyA)
+
+        for i in range(len(self.grid[armyA.pos_x, armyA.pos_y].standing_on)):
+            if self.grid[armyA.pos_x, armyA.pos_y].standing_on[i].number != armyA.number:
+                armyA.in_battle = True
+                armyA.opponent = self.grid[armyA.pos_x, armyA.pos_y].standing_on[i]
+            if self.grid[armyA.pos_x, armyA.pos_y].standing_on[i].number == armyA.number and self.grid[armyA.pos_x, armyA.pos_y].standing_on[i].in_battle:
+                self.grid[armyA.pos_x, armyA.pos_y].standing_on[i].morale += 0.05
+    def updateArmyB(self, armyB):
+        self.grid[armyB.pos_x][armyB.pos_y].occupied_by = 2
+        self.allUnitsMove(armyB, "B")
+
+        if not armyB.in_battle:
+            newAfield = self.armyMove(armyB)
+            if armyB in self.grid[armyB.pos_x][armyB.pos_y].standing_on:
+                self.grid[armyB.pos_x][armyB.pos_y].standing_on.remove(armyB)
+            armyB.move(newAfield[0], newAfield[1])
+            self.grid[newAfield[0], newAfield[1]].standing_on.append(armyB)
+        else:
+            if armyB.morale == 0:
+                retreat(armyB, armyB.opponent, len(self.grid) - 1, len(self.grid[0]) - 1, "B")
+                self.kingdomB.morale -= 0.2
+                self.kingdomA.morale += 0.1
+            else:
+                updateMoraleBattle(armyB)
+
+        for i in range(len(self.grid[armyB.pos_x, armyB.pos_y].standing_on)):
+            if self.grid[armyB.pos_x, armyB.pos_y].standing_on[i].number != armyB.number:
+                armyB.in_battle = True
+                armyB.opponent = self.grid[armyB.pos_x, armyB.pos_y].standing_on[i]
+
+    '''
+    def updateArmy(self, armyA, armyB):
+        self.grid[armyA.pos_x][armyA.pos_y].occupied_by = 1
+        self.grid[armyB.pos_x][armyB.pos_y].occupied_by = 2
+
+        self.checkRecruitmentPossibility(armyA, "A")
+        self.checkRecruitmentPossibility(armyB, "B")
+        self.allUnitsMove(armyA, "A")
+        self.allUnitsMove(armyB, "B")
+
+        if not armyA.in_battle:
+            newAfield = self.armyMove(armyA)
+            armyA.move(newAfield[0], newAfield[1])
+
+            if armyA.pos_x != armyB.pos_x or armyA.pos_y != armyB.pos_y:
+                newBfield = self.armyMove(armyB)
+                armyB.move(newBfield[0], newBfield[1])
 
         else:
-            if self.armyA.morale == 0:
-                retreat(self.armyA, self.armyB, 0, 0, "A")
-            elif self.armyB.morale == 0:
-                retreat(self.armyB, self.armyA, len(self.grid) - 1, len(self.grid[0]) - 1, "B")
+            if armyA.morale == 0:
+                retreat(armyA, armyB, 0, 0, "A")
+            elif armyB.morale == 0:
+                retreat(armyB, armyA, len(self.grid) - 1, len(self.grid[0]) - 1, "B")
             else:
-                updateMoraleBattle(self.armyA)
-                updateMoraleBattle(self.armyB)
+                updateMoraleBattle(armyA)
+                updateMoraleBattle(armyB)
 
         self.updateTreasure()
 
-        if self.armyA.pos_x == self.armyB.pos_x and self.armyA.pos_y == self.armyB.pos_y:
-            self.armyA.in_battle = True
-            self.armyB.in_battle = True
+        if armyA.pos_x == armyB.pos_x and armyA.pos_y == armyB.pos_y:
+            armyA.in_battle = True
+            armyB.in_battle = True
+    '''
 
     def armyMove(self, army):
         neighbours = self.neighbours(army.pos_x, army.pos_y)
-        move = random.choice(neighbours)
+        if army.number == 1 and random.random() < 0.2:
+            move = neighbours[-1]
+        elif army.number == 2 and random.random() < 0.2:
+            move = neighbours[0]
+        else:
+            move = random.choice(neighbours)
+
         for i in range(0, len(neighbours)):
             move = self.determineMovement(army, neighbours, i, move)
 
@@ -207,29 +289,34 @@ class Grid:
             m = advanceToArmy(self.neighbours(u.pos_x, u.pos_y), army)
             u.move(m[0], m[1])
             if ab == "A":
-                if not army.in_battle and u not in army.units_merged:
-                    if self.armyB.pos_x == u.pos_x and self.armyB.pos_y == u.pos_y:
+                if u not in army.units_merged:
+                    if army.pos_x == u.pos_x and army.pos_y == u.pos_y:
                         to_remove.append(u)
+                        army.units_merged.append(u)
+                        updateMorale(army, 1)
                         continue
                     else:
                         self.grid[m[0], m[1]].occupied_by = 1
             else:
-                if not army.in_battle and u not in army.units_merged:
-                    if self.armyA.pos_x == u.pos_x and self.armyA.pos_y == u.pos_y:
+                if u not in army.units_merged:
+                    if army.pos_x == u.pos_x and army.pos_y == u.pos_y:
                         to_remove.append(u)
+                        army.units_merged.append(u)
+                        updateMorale(army, 1)
                         continue
                     else:
                         self.grid[m[0], m[1]].occupied_by = 2
-            if u.pos_x == army.pos_x and u.pos_y == army.pos_y and \
-                    u.identifier not in [unit.identifier for unit in army.units_merged]:
-                army.units_merged.append(u)
-                updateMorale(army, 1)
         for u in to_remove:
             army.units.remove(u)
 
-    def checkRecruitmentPossibility(self, army, ab):
-        if army.money > 1000:
-            army.recruitUnit(ab, self.size)
+    # and u.identifier not in [unit.identifier for unit in army.units_merged]
+
+    def checkRecruitmentPossibility(self, ab):
+        if ab == "A" and self.kingdomA.money > 1000:
+            self.kingdomA.recruitUnit(ab, self.size)
+        elif ab == "B" and self.kingdomB.money > 1000:
+            self.kingdomB.recruitUnit(ab, self.size)
+
 
     def neighbours(self, row, col):
         neighbours = flatten([[(i, j) if 0 <= i < len(self.grid) and 0 <= j < len(self.grid[0]) else ()
@@ -241,23 +328,25 @@ class Grid:
         for i in range(self.size):
             for j in range(self.size):
                 if self.grid[i][j].occupied_by == 1:
-                    self.armyA.money += self.grid[i][j].gold_generated
+                    self.kingdomA.money += self.grid[i][j].gold_generated
                 if self.grid[i][j].occupied_by == 2:
-                    self.armyB.money += self.grid[i][j].gold_generated
-        for unit in self.armyA.units:
-            self.armyA.money -= unit.maintenance
-        for unit in self.armyB.units:
-            self.armyB.money -= unit.maintenance
-        if self.armyA.money < -100:
-            if len(self.armyA.units) == len(self.armyA.units_merged):
-                self.armyA.units.pop()
-                self.armyA.units_merged.pop()
-                updateMorale(self.armyA, 0)
-        if self.armyB.money < -100:
-            if len(self.armyB.units) == len(self.armyB.units_merged):
-                self.armyB.units.pop()
-                self.armyB.units_merged.pop()
-                updateMorale(self.armyB, 0)
+                    self.kingdomB.money += self.grid[i][j].gold_generated
+        for army in self.kingdomA.armies:
+            for unit in army.units:
+                self.kingdomA.money -= unit.maintenance
+        for army in self.kingdomB.armies:
+            for unit in army.units:
+                self.kingdomB.money -= unit.maintenance
+        if self.kingdomA.money < -100:
+            if len(self.kingdomA.armies[-1].units) == len(self.kingdomA.armies[-1].units_merged):
+                self.kingdomA.armies[-1].units.pop()
+                self.kingdomA.armies[-1].units_merged.pop()
+                updateMorale(self.kingdomA.armies[-1], 0)
+        if self.kingdomB.money < -100:
+            if len(self.kingdomB.armies[-1].units) == len(self.kingdomB.armies[-1].units_merged):
+                self.kingdomB.armies[-1].units.pop()
+                self.kingdomB.armies[-1].units_merged.pop()
+                updateMorale(self.kingdomB.armies[-1], 0)
 
 
 def flatten(_):

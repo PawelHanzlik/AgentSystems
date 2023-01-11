@@ -1,5 +1,4 @@
 import pygame
-import time
 from pygame.locals import (
     QUIT,
     KEYDOWN,
@@ -15,16 +14,14 @@ from unit import Unit
 def simulation():
     pygame.init()
     timer = 0
-    # Parameters
-    w_width = 800
+
+    w_width = 900
     w_height = 600
     gridSize = 20
-    battle = False
 
-    # Set up the drawing window, adjust the size
     screen = pygame.display.set_mode([w_width, w_height])
-    font = pygame.font.SysFont('Garamond', 16)
-    # Set background
+    font = pygame.font.SysFont('arial', 16)
+
     screen.fill((128, 128, 128))
     unitA = Unit(1, 0, 0, 0, 5, 'images/blueUnit.png')
     unitB = Unit(1, gridSize - 1, gridSize - 1, 0, 5, 'images/redUnit.png')
@@ -36,13 +33,13 @@ def simulation():
     armyB = Army('images/redArmy.png', 0, 2, gridSize - 1, gridSize - 1, unitsB, unitsB_merged, 800, False, 1.5)
     armiesA = [armyA]
     armiesB = [armyB]
-    kingdomA = Kingdom(1, armiesA, 800, 5.0)
-    kingdomB = Kingdom(2, armiesB, 800, 5.0)
+    kingdomA = Kingdom(1, armiesA, 8000, 20.0)
+    kingdomB = Kingdom(2, armiesB, 8000, 20.0)
 
     grid = Grid(gridSize, kingdomA, kingdomB)
     grid.grid[0][0].occupied_by = 1
     grid.grid[gridSize - 1][gridSize - 1].occupied_by = 2
-    # Set background
+
     screen.fill((128, 128, 128))
 
     blit(screen, timer, grid, w_width, w_height, kingdomA, kingdomB)
@@ -72,48 +69,52 @@ def simulation():
             victory_msg = font.render("Kingdom B Victory!", False, (0, 0, 255))
             screen.blit(victory_msg, (650, 420))
             pygame.display.flip()
+            gatherFinalInfo(grid)
             while running:
-                if event.type == KEYDOWN:
+                for event in pygame.event.get():
                     if event.type == QUIT:
                         running = False
-                    if event.key == K_ESCAPE:
-                        running = False
+                    if event.type == KEYDOWN:
+                        if event.key == K_ESCAPE:
+                            running = False
         elif kingdomB.morale <= 0:
             victory_msg = font.render("Kingdom A Victory!", False, (0, 0, 255))
             screen.blit(victory_msg, (650, 420))
             pygame.display.flip()
+            gatherFinalInfo(grid)
             while running:
-                if event.type == QUIT:
-                    running = False
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
+                for event in pygame.event.get():
+                    if event.type == QUIT:
                         running = False
+                    if event.type == KEYDOWN:
+                        if event.key == K_ESCAPE:
+                            running = False
 
     pygame.quit()
 
 
 def blit(screen, timer, grid, w_width, w_height, kingdomA, kingdomB):
     drawGrid(screen, grid, w_width, w_height)
-    screen.fill((128, 128, 128), rect=(650, 100, 150, 50))
-    screen.fill((128, 128, 128), rect=(650, 130, 150, 50))
-    screen.fill((128, 128, 128), rect=(650, 160, 150, 50))
-    screen.fill((128, 128, 128), rect=(650, 200, 150, 50))
-    screen.fill((128, 128, 128), rect=(650, 230, 150, 80))
-    screen.fill((128, 128, 128), rect=(650, 270, 150, 80))
-    screen.fill((128, 128, 128), rect=(650, 300, 150, 80))
-    screen.fill((128, 128, 128), rect=(650, 330, 150, 80))
-    font = pygame.font.SysFont('Garamond', 16)
+    screen.fill((128, 128, 128), rect=(650, 100, 150, 150))
+    screen.fill((128, 128, 128), rect=(650, 130, 250, 250))
+    screen.fill((128, 128, 128), rect=(650, 160, 250, 250))
+    screen.fill((128, 128, 128), rect=(650, 200, 150, 150))
+    screen.fill((128, 128, 128), rect=(650, 230, 150, 180))
+    screen.fill((128, 128, 128), rect=(650, 270, 150, 180))
+    screen.fill((128, 128, 128), rect=(650, 300, 150, 180))
+    screen.fill((128, 128, 128), rect=(650, 330, 150, 180))
+    font = pygame.font.SysFont('arial', 16)
     timerSurface = font.render("Day: " + str(timer), False, (255, 0, 0))
     armyA_Surface = font.render("Gold kingdom A: " + str(kingdomA.money), False, (212, 175, 55))
     armyB_Surface = font.render("Gold kingdom B: " + str(kingdomB.money), False, (212, 175, 55))
-    asize = 0
-    bsize = 0
+    a_size = 0
+    b_size = 0
     for i in kingdomA.armies:
-        asize += len(i.units) + len(i.units_merged)
+        a_size += len(i.units) + len(i.units_merged)
     for i in kingdomB.armies:
-        bsize += len(i.units) + len(i.units_merged)
-    armyA_Size = font.render("kingdom A size: " + str(asize), False, (0, 255, 0))
-    armyB_Size = font.render("kingdom B size: " + str(bsize), False, (0, 255, 0))
+        b_size += len(i.units) + len(i.units_merged)
+    armyA_Size = font.render("kingdom A size: " + str(a_size), False, (0, 255, 0))
+    armyB_Size = font.render("kingdom B size: " + str(b_size), False, (0, 255, 0))
     kingdomA_morale = font.render("A morale: " + str(round(kingdomA.morale, 2)), False, (0, 0, 255))
     kingdomB_morale = font.render("B morale: " + str(round(kingdomB.morale, 2)), False, (0, 0, 255))
     screen.blit(timerSurface, (650, 100))
@@ -132,3 +133,18 @@ def blit(screen, timer, grid, w_width, w_height, kingdomA, kingdomB):
             screen.blit(armyB_Morale, (650, 390))
             screen.blit(battle, (650, 330))
             break
+
+
+def gatherFinalInfo(grid):
+    occA = 0
+    occB = 0
+    fields = 0
+    for row in grid.grid:
+        for field in row:
+            fields += 1
+            if field.occupied_by == 1:
+                occA += 1
+            elif field.occupied_by == 2:
+                occB += 1
+    print(occA, " ", occB, " ", len(grid.grid))
+    print(occA/fields, " ", occB/fields)
